@@ -35,6 +35,10 @@ Confidence-aware blending
 Final rating prediction
 ```
 
+### Architecture Diagram
+
+![Architecture Diagram](../assets/architecture_diagram.png)
+
 ## Component 1: Gradient-Boosted Models
 
 The main predictive component uses gradient-boosted decision trees.

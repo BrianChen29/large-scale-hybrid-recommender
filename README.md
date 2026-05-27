@@ -102,6 +102,9 @@ Confidence-aware blending
 Final rating prediction
 ```
 
+### Architecture Diagram
+![Architecture Diagram](assets/architecture_diagram.png)
+
 ## Evaluation
 
 The system was evaluated using RMSE for rating prediction.
