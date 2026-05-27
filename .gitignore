@@ -1,12 +1,33 @@
+# Data files
 data/
+datasets/
 *.csv
 *.json
+*.jsonl
 *.parquet
+
+# Model artifacts
 *.pkl
 *.joblib
 *.model
+*.bin
 *.tmp
+
+# Outputs
+outputs/
+output.csv
+predictions.csv
+RESULT.tmp
+
+# Python
 __pycache__/
+*.pyc
 .ipynb_checkpoints/
+
+# Environment
 .env
+.venv/
+venv/
+
+# System
 .DS_Store
