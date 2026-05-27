@@ -1,5 +1,12 @@
 # Large-Scale Hybrid Recommendation Engine
 
+![Python](https://img.shields.io/badge/Python-3.9-blue?logo=python)
+![PySpark](https://img.shields.io/badge/PySpark-Distributed_ETL-orange?logo=apachespark)
+![XGBoost](https://img.shields.io/badge/XGBoost-Gradient_Boosting-green)
+![NumPy](https://img.shields.io/badge/NumPy-Numerical_Computing-013243?logo=numpy)
+![Recommender System](https://img.shields.io/badge/Recommender_System-Hybrid_Model-purple)
+![Collaborative Filtering](https://img.shields.io/badge/Collaborative_Filtering-Residual_CF-lightgrey)
+
 A portfolio case study of a large-scale rating prediction system built with Spark, XGBoost, collaborative filtering, and memory-aware feature engineering.
 
 This repository summarizes the system design, modeling strategy, evaluation results, and engineering trade-offs behind a hybrid recommendation engine. It intentionally does not include course-provided data, assignment-specific scripts, or full solution code.
