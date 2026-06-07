@@ -9,7 +9,7 @@
 
 A portfolio case study of a Spark + XGBoost hybrid recommender for large-scale user-business rating prediction.
 
-The final hybrid reached ~`0.9733` validation RMSE (1,283s under a 1,500s Vocareum budget), clearing the 0.98 competition benchmark. The result came from stacking complementary signals over a simple metadata + XGBoost baseline (~`0.9819`) — a regularized user/business bias baseline, a multi-view XGBoost ensemble, and an item-based residual collaborative-filtering component — combined with a confidence-aware blend, improving across ~8 documented incremental versions rather than from a single model change.
+The final hybrid reached ≈`0.9733` validation RMSE (1,283s under a 1,500s Vocareum budget), clearing the 0.98 competition benchmark. The result came from stacking complementary signals over a simple metadata + XGBoost baseline (≈`0.9819`) — a regularized user/business bias baseline, a multi-view XGBoost ensemble, and an item-based residual collaborative-filtering component — combined with a confidence-aware blend, improving across about 8 documented incremental versions rather than from a single model change.
 
 ## Project Context and Repository Scope
 
