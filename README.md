@@ -9,7 +9,7 @@
 
 A portfolio case study of a Spark + XGBoost hybrid recommender for large-scale user-business rating prediction.
 
-The system improved validation RMSE from approximately `0.9820` to `0.9738` by combining leakage-aware feature engineering, regularized user/business bias modeling, residual collaborative filtering, and memory-conscious model training.
+The final hybrid reached ~`0.9733` validation RMSE (1,283s under a 1,500s Vocareum budget), clearing the 0.98 competition benchmark. The result came from stacking complementary signals over a simple metadata + XGBoost baseline (~`0.9819`) — a regularized user/business bias baseline, a multi-view XGBoost ensemble, and an item-based residual collaborative-filtering component — combined with a confidence-aware blend, improving across ~8 documented incremental versions rather than from a single model change.
 
 ## Project Context and Repository Scope
 
@@ -26,7 +26,7 @@ Instead, the repository is structured as a portfolio case study. It includes san
 | Data processing | Spark-based preprocessing and feature aggregation |
 | Modeling | Multi-view XGBoost regression with confidence-aware blending |
 | Key engineering focus | Target-leakage prevention, cold-start handling, memory/runtime optimization |
-| Result | Validation RMSE improved from `~0.9820` to `~0.9738` |
+| Result | ~`0.9733` validation RMSE under the 0.98 benchmark, from a ~0.9819 metadata+XGBoost baseline |
 
 ## Overview
 
@@ -43,7 +43,7 @@ The goal was to improve prediction accuracy while keeping the pipeline efficient
 - Added regularized user/business bias terms for cold-start fallback and baseline prediction.
 - Used residual collaborative filtering to model neighborhood-based deviations from the bias baseline.
 - Blended metadata, bias, and collaborative signals based on history availability and confidence.
-- Improved validation RMSE from approximately `0.9820` to `0.9738`.
+- Improved validation RMSE from a ~`0.9819` metadata+XGBoost baseline to ~0.9733 by progressively adding a regularized bias baseline, residual collaborative filtering, multi-view feature engineering, and a high-rating correction.
 - Optimized memory and runtime with `float32` matrices, staged model cleanup, and histogram-based XGBoost training.
 
 ## Tech Stack
@@ -130,9 +130,12 @@ The system was evaluated using RMSE for rating prediction.
 
 | Model Version | RMSE |
 |---|---:|
-| Metadata + XGBoost baseline | ~0.9820 |
-| Hybrid model with bias and CF signals | ~0.975 |
-| Final multi-view hybrid model | ~0.9738 |
+| Metadata + XGBoost baseline (13 features) | ~0.9819 |
+| + Regularized bias baseline & residual CF | ~0.9776 |
+| First mature hybrid (ensemble + blend) | ~0.9751 |
+| Final multi-view hybrid | ~0.9733 |
+
+The improvement did not come from a single model change but accumulated across roughly eight incremental versions, each re-scored on the same held-out grader. The largest single step was adding the regularized bias baseline and residual collaborative filtering on top of the metadata model; later gains came from multi-view feature engineering, leakage-aware rating statistics, and a lightweight high-rating correction. Each version's consistent improvement on the same evaluation set — rather than one large jump — is the main evidence the gains are real rather than noise.
 
 The final model reduced RMSE by approximately `0.0082` compared with the metadata-only baseline, or about `0.84%` relative improvement. The improvement came from combining several stable signals rather than relying on a single model change.
 
