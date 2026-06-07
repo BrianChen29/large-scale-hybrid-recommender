@@ -135,6 +135,21 @@ The system was evaluated using RMSE for rating prediction.
 | First mature hybrid (ensemble + blend) | ~0.9751 |
 | Final multi-view hybrid | ~0.9733 |
 
+### Component Ablation (standalone RMSE on validation, 142,044 rows)
+
+| Component / View | RMSE |
+|---|---:|
+| Base view (XGBoost) | 0.9763 |
+| Rating-stat view (XGBoost) | 0.9797 |
+| Review-text view (XGBoost) | 0.9761 |
+| Review-topic view (XGBoost) | 0.9762 |
+| **Multi-view XGBoost ensemble** (blended 0.19/0.25/0.26/0.30) | **0.9740** |
+| Regularized bias baseline | 1.0004 |
+| Residual CF | 1.0058 |
+| **Final hybrid** (segmented blend + high-rating correction) | **0.9733** |
+
+The XGBoost ensemble is the workhorse; the bias baseline and residual CF are weak standalone (≈1.00) but stabilize the blend. Notably, the rating-stat view has the *weakest* standalone RMSE (0.9797) yet receives the second-highest blend weight (0.25) — the views are combined for decorrelated errors, not individual strength.
+
 The improvement did not come from a single model change but accumulated across roughly eight incremental versions, each re-scored on the same held-out grader. The largest single step was adding the regularized bias baseline and residual collaborative filtering on top of the metadata model; later gains came from multi-view feature engineering, leakage-aware rating statistics, and a lightweight high-rating correction. Each version's consistent improvement on the same evaluation set — rather than one large jump — is the main evidence the gains are real rather than noise.
 
 The final model reduced RMSE by approximately `0.0082` compared with the metadata-only baseline, or about `0.84%` relative improvement. The improvement came from combining several stable signals rather than relying on a single model change.
