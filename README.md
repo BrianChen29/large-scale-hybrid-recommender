@@ -152,8 +152,6 @@ The XGBoost ensemble is the workhorse; the bias baseline and residual CF are wea
 
 The improvement did not come from a single model change but accumulated across roughly eight incremental versions, each re-scored on the same held-out grader. The largest single step was adding the regularized bias baseline and residual collaborative filtering on top of the metadata model; later gains came from multi-view feature engineering, leakage-aware rating statistics, and a lightweight high-rating correction. Each version's consistent improvement on the same evaluation set — rather than one large jump — is the main evidence the gains are real rather than noise.
 
-The final model reduced RMSE by approximately `0.0082` compared with the metadata-only baseline, or about `0.84%` relative improvement. The improvement came from combining several stable signals rather than relying on a single model change.
-
 The largest remaining errors were concentrated in extreme ratings, especially unexpected 1-star and 5-star cases. This is common in rating prediction because extreme user experiences often depend on event-specific context that may not be fully captured by historical metadata.
 
 See [`docs/evaluation.md`](docs/evaluation.md) for more details.
