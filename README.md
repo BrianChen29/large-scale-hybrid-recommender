@@ -26,7 +26,7 @@ Instead, the repository is structured as a portfolio case study. It includes san
 | Data processing | Spark-based preprocessing and feature aggregation |
 | Modeling | Multi-view XGBoost regression with confidence-aware blending |
 | Key engineering focus | Target-leakage prevention, cold-start handling, memory/runtime optimization |
-| Result | ~`0.9733` validation RMSE under the 0.98 benchmark, from a ~0.9819 metadata+XGBoost baseline |
+| Result | ≈0.9733 validation RMSE under the 0.98 benchmark, from a ≈0.9819 metadata+XGBoost baseline |
 
 ## Overview
 
@@ -43,7 +43,7 @@ The goal was to improve prediction accuracy while keeping the pipeline efficient
 - Added regularized user/business bias terms for cold-start fallback and baseline prediction.
 - Used residual collaborative filtering to model neighborhood-based deviations from the bias baseline.
 - Blended metadata, bias, and collaborative signals based on history availability and confidence.
-- Improved validation RMSE from a ~`0.9819` metadata+XGBoost baseline to ~0.9733 by progressively adding a regularized bias baseline, residual collaborative filtering, multi-view feature engineering, and a high-rating correction.
+- Improved validation RMSE from a ≈0.9819 metadata+XGBoost baseline to ≈0.9733 by progressively adding a regularized bias baseline, residual collaborative filtering, multi-view feature engineering, and a high-rating correction.
 - Optimized memory and runtime with `float32` matrices, staged model cleanup, and histogram-based XGBoost training.
 
 ## Tech Stack
@@ -130,10 +130,10 @@ The system was evaluated using RMSE for rating prediction.
 
 | Model Version | RMSE |
 |---|---:|
-| Metadata + XGBoost baseline (13 features) | ~0.9819 |
-| + Regularized bias baseline & residual CF | ~0.9776 |
-| First mature hybrid (ensemble + blend) | ~0.9751 |
-| Final multi-view hybrid | ~0.9733 |
+| Metadata + XGBoost baseline (13 features) | ≈0.9819 |
+| + Regularized bias baseline & residual CF | ≈0.9776 |
+| First mature hybrid (ensemble + blend) | ≈0.9751 |
+| Final multi-view hybrid | ≈0.9733 |
 
 ### Component Ablation (standalone RMSE on validation, 142,044 rows)
 
@@ -148,7 +148,7 @@ The system was evaluated using RMSE for rating prediction.
 | Residual CF | 1.0058 |
 | **Final hybrid** (segmented blend + high-rating correction) | **0.9733** |
 
-The XGBoost ensemble is the workhorse; the bias baseline and residual CF are weak standalone (≈1.00) but stabilize the blend. Notably, the rating-stat view has the *weakest* standalone RMSE (0.9797) yet receives the second-highest blend weight (0.25) — the views are combined for decorrelated errors, not individual strength.
+The XGBoost ensemble is the workhorse; the bias baseline and residual CF are weak standalone (≈1.00) but stabilize the blend. Notably, the rating-stat view has the *weakest* standalone RMSE (0.9797) yet receives a higher blend weight (0.25) than the stronger base view (0.9763, weight 0.19), and the highest weight (0.30) goes to the topic view rather than to the strongest single view (text) — the views are combined for decorrelated errors, not individual strength.
 
 The improvement did not come from a single model change but accumulated across roughly eight incremental versions, each re-scored on the same held-out grader. The largest single step was adding the regularized bias baseline and residual collaborative filtering on top of the metadata model; later gains came from multi-view feature engineering, leakage-aware rating statistics, and a lightweight high-rating correction. Each version's consistent improvement on the same evaluation set — rather than one large jump — is the main evidence the gains are real rather than noise.
 
@@ -166,6 +166,17 @@ Key engineering challenges included:
 - Combining model-based and collaborative filtering signals
 - Improving cold-start robustness
 - Managing large intermediate matrices during model training
+
+## Alternatives Explored
+
+Several common improvements were tested and deliberately dropped — the rationale matters as much as the final design:
+
+- **ALS / matrix factorization.** As a small-weight blend member it matched the XGBoost-only result without adding signal, and giving it more influence (higher latent rank, or feeding its latent factors into the trees as features) degraded accuracy — tree models don't naturally exploit latent dot-product interactions. A regularized bias baseline replaced it: both more accurate *and* cheaper to compute.
+- **Learned (out-of-fold) stacking** instead of the hand-tuned blend. A naive holdout leaked, because the historical rating statistics were still computed over the full training set; a correct per-fold rebuild of every feature and model would have exceeded the runtime budget. The confidence-segmented hand blend was the honest, shippable choice.
+- **Bayesian smoothing** as a replacement for raw averages. It over-smoothed and removed variation the gradient-boosted trees were actively using; raw and smoothed signals were kept together instead.
+- **A low-rating (1-star) correction.** Sudden bad experiences aren't visible in metadata, and pushing predictions down hurt normal 3/4/5-star cases.
+
+These trade-offs are why the final system favors stable, complementary signals under a hard compute budget over heavier components that didn't earn their cost.
 
 ## Documentation
 

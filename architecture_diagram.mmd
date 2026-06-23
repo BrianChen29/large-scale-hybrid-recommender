@@ -1,0 +1,26 @@
+flowchart TD
+    Data["Yelp data<br/>yelp_train.csv + user/business/photo/tip/checkin/review JSON"]
+    Data --> Spark["Spark RDD preprocessing<br/>per-user / per-business / per-pair aggregates"]
+
+    Spark --> Bias["1. Regularized bias baseline<br/>mu + b_u + b_i · 12 alternating passes · lambda=5"]
+    Spark --> FE["Feature views (leave-one-out for train rows)"]
+    Spark --> CF["3. Item-based residual CF<br/>Pearson over co-rated users · overlap shrinkage<br/>top-20 · damping 2 · predicts residual over baseline"]
+
+    FE --> V1["Base view<br/>metadata + activity"]
+    FE --> V2["Rating-stat view (LOO)"]
+    FE --> V3["Review-text view (LOO)"]
+    FE --> V4["Review-topic view (LOO, hashed-8)"]
+    V1 --> XGB
+    V2 --> XGB
+    V3 --> XGB
+    V4 --> XGB
+    XGB["2. Multi-view XGBoost ensemble<br/>hist · float32 · fixed weights 0.19 / 0.25 / 0.26 / 0.30"]
+
+    Bias -. "baseline reference" .-> CF
+    XGB --> Blend
+    Bias --> Blend
+    CF --> Blend
+    Blend["4. Confidence + cold-start segmented blend"]
+
+    Blend --> Corr["5. High-rating correction<br/>pred += 0.07 · max(0, pred-3.9) · max(0, 4.9-pred)"]
+    Corr --> Out["Final prediction, clip to 1-5<br/>RMSE 0.9733 (1,283s / 1,500s)"]

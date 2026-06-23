@@ -14,11 +14,14 @@ Lower RMSE indicates better prediction accuracy.
 
 ## Result Summary
 
-| Model Version                         |    RMSE |
-| ------------------------------------- | ------: |
-| Metadata + XGBoost baseline           | ~0.9820 |
-| Hybrid model with bias and CF signals |  ~0.975 |
-| Final multi-view hybrid model         | ~0.9738 |
+| Model Version                          |    RMSE |
+| -------------------------------------- | ------: |
+| Metadata + XGBoost baseline (13 feat.) | ≈0.9819 |
+| + Regularized bias baseline & residual CF | ≈0.9776 |
+| First mature hybrid (ensemble + blend) | ≈0.9751 |
+| Final multi-view hybrid model          | ≈0.9733 |
+
+Component ablation (standalone RMSE on validation, 142,044 rows): base view 0.9763, rating-stat view 0.9797, review-text view 0.9761, review-topic view 0.9762, multi-view XGBoost ensemble 0.9740, regularized bias baseline 1.0004, residual CF 1.0058, final hybrid 0.9733.
 
 The final system improved over the baseline by combining metadata features, rating history features, regularized bias modeling, residual collaborative filtering, and lightweight text-derived aggregate features.
 
@@ -84,6 +87,15 @@ The strongest signals were:
 * Collaborative residual signals
 
 The project also showed that practical ML systems require both modeling improvements and engineering optimizations.
+
+## Alternatives Explored and Rejected
+
+Several common techniques were tested and intentionally dropped, which informed the final design:
+
+* **Matrix factorization (ALS).** Added no value as a small-weight blend member and degraded accuracy when given more influence or when its latent factors were fed into the tree models, since gradient-boosted trees do not naturally exploit latent dot-product interactions. A regularized bias baseline replaced it as a more accurate and cheaper alternative.
+* **Learned out-of-fold stacking.** A naive holdout leaked through history-based aggregates, and a correct per-fold rebuild was too expensive under the runtime budget, so a confidence-segmented hand-tuned blend was used instead.
+* **Bayesian smoothing of raw averages.** Over-smoothed away variation the trees were using; raw and smoothed signals were kept together.
+* **Low-rating correction.** Hurt normal cases because sudden negative experiences are not visible in historical metadata.
 
 ## Future Improvements
 
